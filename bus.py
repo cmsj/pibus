@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """Fetch live travel data from Transport for London"""
 
+WHITE=1
+BLACK=0
+
 import argparse
 import datetime
 import json
 import logging
 import sys
 
-from apscheduler.schedulers.blocking import BlockingScheduler
-from EPD import EPD
 import iso8601
 import PIL
 import requests
+
+from apscheduler.schedulers.blocking import BlockingScheduler
+from EPD import EPD
+from PIL import ImageFont, ImageDraw
 
 
 def parse_options(args=None):
@@ -25,7 +30,7 @@ def parse_options(args=None):
                         help='Name of a bus route')
     parser.add_argument('-u', '--base-url', action='store', dest='baseURL',
                         help='Base URL of TFL API endpoint',
-                        default="https://api.tfl.gov.uk/")
+                        default="https://api.tfl.gov.uk")
     parser.add_argument('-d', '--debug', action='store_true', dest='debug',
                         help='Turn on debugging', default=False)
 
