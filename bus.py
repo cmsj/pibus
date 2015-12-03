@@ -43,8 +43,12 @@ class PyBus:
     scheduler = None
     currentJSON = None
     logger = None
-    fontObject = None
+    fontTiny = None
+    fontMedium = None
+    fontLarge = None
+    fontHuge = None
     panel = None
+    partialCount = None
 
     def __init__(self, options, scheduler):
         self.options = options
@@ -60,7 +64,13 @@ class PyBus:
             self.logger.error("You must provide both bus stop and bus route")
             sys.exit(1)
 
-        # self.fontObject = PIL.ImageFont.truetype("font.ttf")
+        self.partialCount = 0
+
+        self.fontTiny = ImageFont.truetype("font.ttf", size=10)
+        self.fontMedium = ImageFont.truetype("font.ttf", size=50)
+        self.fontLarge = ImageFont.truetype("font.ttf", size=80)
+        self.fontHuge= ImageFont.truetype("font.ttf", size=150)
+
         try:
             self.panel = EPD()
 
@@ -129,10 +139,43 @@ class PyBus:
             due = iso8601.parse_date(bus["expectedArrival"])
             dueDiff = due - now
             minutesDue = divmod(dueDiff.total_seconds(), 60)[0]
-            times.append(max(minutesDue, 0))
+            times.append("%02d" % max(minutesDue, 0))
 
         times.sort()
+
+        if len(times) == 0:
+            times.append("--")
+        if len(times) == 1:
+            times.append("--")
+        if len(times) == 2:
+            times.append("--")
+
         return times
+
+    def renderBusInfo(self):
+        """Render the available bus information to the e-Ink display"""
+        # the first argument means we get a 1 bit depth
+        image = PIL.Image.new('1', self.panel.size, WHITE)
+        draw = ImageDraw.Draw(image)
+
+        times = self.getTimes()
+        if not times:
+            # TODO: Display a message
+            self.panel.clear()
+            return
+
+        draw.text((-3, 0), times[0], font=self.fontHuge, fill=BLACK)
+        draw.text((170, 13), times[1], font=self.fontLarge, fill=BLACK)
+        draw.text((172, 95), times[2], font=self.fontMedium, fill=BLACK)
+
+        self.panel.display(image)
+
+        if self.partialCount >= 10:
+            self.panel.update()
+            self.partialCount = 0
+        else:
+            self.panel.partial_update()
+            self.partialCount += 1
 
     def dummyShowBusInfo(self):
         """blah"""
