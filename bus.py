@@ -38,6 +38,8 @@ class PyBus:
     scheduler = None
     currentJSON = None
     logger = None
+    fontObject = None
+    panel = None
 
     def __init__(self, options, scheduler):
         self.options = options
@@ -52,6 +54,16 @@ class PyBus:
         if not self.options.busStopID or not self.options.busLine:
             self.err("You must provide both bus stop and bus route")
             sys.exit(1)
+
+        # self.fontObject = PIL.ImageFont.truetype("font.ttf")
+        try:
+            self.panel = EPD()
+
+            self.logger.debug("Panel: {w:d}x{h:d}".format(w=self.panel.width,
+                                                          h=self.panel.height))
+        except Exception as e:
+            self.panel = None
+            self.logger.warn("No panel found: %s" % e)
 
         self.scheduler.add_job(self.updateBusInfo,
                                trigger='interval',
