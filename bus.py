@@ -49,10 +49,10 @@ class PyBus:
         if options.debug:
             self.logger.setLevel(logging.DEBUG)
 
-        self.dbg("Command line options: %s" % self.options)
+        self.logger.debug("Command line options: %s" % self.options)
 
         if not self.options.busStopID or not self.options.busLine:
-            self.err("You must provide both bus stop and bus route")
+            self.logger.error("You must provide both bus stop and bus route")
             sys.exit(1)
 
         # self.fontObject = PIL.ImageFont.truetype("font.ttf")
@@ -76,18 +76,6 @@ class PyBus:
                                next_run_time=datetime.datetime.now(),
                                max_instances=1)
 
-    def dbg(self, message):
-        """Print a debugging message"""
-        self.logger.debug(message)
-
-    def err(self, message):
-        """Print an error message"""
-        self.logger.error(message)
-
-    def info(self, message):
-        """Print an informational message"""
-        self.logger.info(message)
-
     def prettifyJSON(self, jsonText):
         """Neatly format JSON to make it human readable"""
         return json.dumps(jsonText, sort_keys=True, indent=4,
@@ -97,14 +85,14 @@ class PyBus:
         """Fetch the JSON for a bus stop"""
         try:
             url = "%s/StopPoint/%s/arrivals" % (baseURL, stopID)
-            self.dbg("Fetching: %s" % url)
+            self.logger.debug("Fetching: %s" % url)
             result = requests.get(url)
         except Exception as e:
-            self.err("fetchBusJSON failed for StopPoint %s: %s" % (stopID, e))
+            self.logger.error("fetchBusJSON error. Stop %s: %s" % (stopID, e))
             return None
 
         jsonResult = result.json()
-        self.dbg("Raw JSON result: %s" % self.prettifyJSON(jsonResult))
+        self.logger.debug("Raw JSON: %s" % self.prettifyJSON(jsonResult))
 
         return jsonResult
 
