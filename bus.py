@@ -85,9 +85,9 @@ class PyBus:
                                seconds=30,
                                next_run_time=datetime.datetime.now(),
                                max_instances=1)
-        self.scheduler.add_job(self.dummyShowBusInfo,
+        self.scheduler.add_job(self.renderBusInfo,
                                trigger='interval',
-                               seconds=5,
+                               seconds=10,
                                next_run_time=datetime.datetime.now(),
                                max_instances=1)
 
