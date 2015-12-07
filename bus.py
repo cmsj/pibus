@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fetch live travel data from Transport for London"""
 
-WHITE=1
-BLACK=0
+WHITE = 1
+BLACK = 0
 
 import argparse
 import datetime
@@ -69,7 +69,7 @@ class PyBus:
         self.fontTiny = ImageFont.truetype("font.ttf", size=10)
         self.fontMedium = ImageFont.truetype("font.ttf", size=50)
         self.fontLarge = ImageFont.truetype("font.ttf", size=80)
-        self.fontHuge= ImageFont.truetype("font.ttf", size=150)
+        self.fontHuge = ImageFont.truetype("font.ttf", size=150)
 
         try:
             self.panel = EPD()
