@@ -174,6 +174,7 @@ class PyBus:
         times = self.getTimes()
         if not times and not self.renderSuspended:
             draw.text((0, 0), "No data available", font=self.fontMedium, fill=BLACK)
+            draw.text((0, 25), time.strftime("%H:%M:%S %d/%m/%Y", time.localtime()), font=self.fontMedium, fill=BLACK)
             self.panel.display(image)
             self.panel.update()
             self.renderSuspended = True
