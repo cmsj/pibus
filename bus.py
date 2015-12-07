@@ -9,6 +9,7 @@ import datetime
 import json
 import logging
 import sys
+import time
 
 import iso8601
 import PIL
@@ -44,11 +45,11 @@ class PyBus:
     currentJSON = None
     logger = None
     fontTiny = None
-    fontMedium = None
     fontLarge = None
     fontHuge = None
     panel = None
     partialCount = None
+    lastFetchTime = None
 
     def __init__(self, options, scheduler):
         self.options = options
@@ -67,8 +68,7 @@ class PyBus:
         self.partialCount = 0
 
         self.fontTiny = ImageFont.truetype("font.ttf", size=10)
-        self.fontMedium = ImageFont.truetype("font.ttf", size=50)
-        self.fontLarge = ImageFont.truetype("font.ttf", size=80)
+        self.fontLarge = ImageFont.truetype("font.ttf", size=75)
         self.fontHuge = ImageFont.truetype("font.ttf", size=150)
 
         try:
@@ -125,6 +125,8 @@ class PyBus:
                self.options.busLine.lower():
                 self.currentJSON.append(busItem)
 
+        self.lastFetchTime = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime())
+
         return True
 
     def getTimes(self):
@@ -164,9 +166,26 @@ class PyBus:
             self.panel.clear()
             return
 
-        draw.text((-3, 0), times[0], font=self.fontHuge, fill=BLACK)
-        draw.text((170, 13), times[1], font=self.fontLarge, fill=BLACK)
-        draw.text((172, 95), times[2], font=self.fontMedium, fill=BLACK)
+        # Draw a box on the screen
+        draw.line(((0, 0), (self.panel.width, 0)), fill=BLACK, width=1)
+        draw.line(((0, 0), (0, self.panel.height)), fill=BLACK, width=1)
+        draw.line(((self.panel.width - 1, 0), (self.panel.width - 1, self.panel.height)), fill=BLACK, width=1)
+        draw.line(((0, self.panel.height - 1), (self.panel.width - 1, self.panel.height - 1)), fill=BLACK, width=1)
+
+        # Divide up the box
+        draw.line(((self.panel.width * 0.66, 0), (self.panel.width * 0.66, self.panel.height)), fill=BLACK, width=1)
+        draw.line(((self.panel.width * 0.66, self.panel.height * 0.5), (self.panel.width, self.panel.height * 0.5)), fill=BLACK, width=1)
+
+        # Render the times
+        draw.text((-3, 20), times[0], font=self.fontHuge, fill=BLACK)
+        draw.text((174, 10), times[1], font=self.fontLarge, fill=BLACK)
+        draw.text((174, 100), times[2], font=self.fontLarge, fill=BLACK)
+
+        # Render the bus route
+        draw.text((1, 0), self.options.busLine, font=self.fontTiny, fill=BLACK)
+
+        # Render the time of last successful data fetch
+        draw.text((1, self.panel.height - 10), "Fetched: %s" % self.lastFetchTime, font=self.fontTiny, fill=BLACK)
 
         self.panel.display(image)
 
