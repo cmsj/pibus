@@ -45,11 +45,13 @@ class PyBus:
     currentJSON = None
     logger = None
     fontTiny = None
+    fontMedium = None
     fontLarge = None
     fontHuge = None
     panel = None
     partialCount = None
     lastFetchTime = None
+    renderSuspended = None
 
     def __init__(self, options, scheduler):
         self.options = options
@@ -66,8 +68,10 @@ class PyBus:
             sys.exit(1)
 
         self.partialCount = 0
+        self.renderSuspended = False
 
         self.fontTiny = ImageFont.truetype("font.ttf", size=10)
+        self.fontMedium = ImageFont.truetype("font.ttf", size=20)
         self.fontLarge = ImageFont.truetype("font.ttf", size=75)
         self.fontHuge = ImageFont.truetype("font.ttf", size=150)
 
@@ -117,6 +121,7 @@ class PyBus:
                                     self.options.busStopID)
         if not rawJSON:
             self.currentJSON = None
+            self.lastFetchTime = -1
             return False
 
         self.currentJSON = []
@@ -160,41 +165,45 @@ class PyBus:
         image = PIL.Image.new('1', self.panel.size, WHITE)
         draw = ImageDraw.Draw(image)
 
-        times = self.getTimes()
-        if not times:
-            # TODO: Display a message
-            self.panel.clear()
-            return
-
         # Draw a box on the screen
         draw.line(((0, 0), (self.panel.width, 0)), fill=BLACK, width=1)
         draw.line(((0, 0), (0, self.panel.height)), fill=BLACK, width=1)
         draw.line(((self.panel.width - 1, 0), (self.panel.width - 1, self.panel.height)), fill=BLACK, width=1)
         draw.line(((0, self.panel.height - 1), (self.panel.width - 1, self.panel.height - 1)), fill=BLACK, width=1)
 
-        # Divide up the box
-        draw.line(((self.panel.width * 0.66, 0), (self.panel.width * 0.66, self.panel.height)), fill=BLACK, width=1)
-        draw.line(((self.panel.width * 0.66, self.panel.height * 0.5), (self.panel.width, self.panel.height * 0.5)), fill=BLACK, width=1)
-
-        # Render the times
-        draw.text((-3, 20), times[0], font=self.fontHuge, fill=BLACK)
-        draw.text((174, 10), times[1], font=self.fontLarge, fill=BLACK)
-        draw.text((174, 100), times[2], font=self.fontLarge, fill=BLACK)
-
-        # Render the bus route
-        draw.text((1, 0), self.options.busLine, font=self.fontTiny, fill=BLACK)
-
-        # Render the time of last successful data fetch
-        draw.text((1, self.panel.height - 10), "Fetched: %s" % self.lastFetchTime, font=self.fontTiny, fill=BLACK)
-
-        self.panel.display(image)
-
-        if self.partialCount >= 10:
+        times = self.getTimes()
+        if not times and not self.renderSuspended:
+            draw.text((0, 0), "No data available", font=self.fontMedium, fill=BLACK)
+            self.panel.display(image)
             self.panel.update()
-            self.partialCount = 0
+            self.renderSuspended = True
+        elif not times:
+            self.logger.debug("Skipping, rendering is suspended")
         else:
-            self.panel.partial_update()
-            self.partialCount += 1
+            self.renderSuspended = False
+            # Divide up the box
+            draw.line(((self.panel.width * 0.66, 0), (self.panel.width * 0.66, self.panel.height)), fill=BLACK, width=1)
+            draw.line(((self.panel.width * 0.66, self.panel.height * 0.5), (self.panel.width, self.panel.height * 0.5)), fill=BLACK, width=1)
+
+            # Render the times
+            draw.text((-3, 20), times[0], font=self.fontHuge, fill=BLACK)
+            draw.text((174, 10), times[1], font=self.fontLarge, fill=BLACK)
+            draw.text((174, 100), times[2], font=self.fontLarge, fill=BLACK)
+
+            # Render the bus route
+            draw.text((1, 0), self.options.busLine, font=self.fontTiny, fill=BLACK)
+
+            # Render the time of last successful data fetch
+            draw.text((1, self.panel.height - 10), "Fetched: %s" % self.lastFetchTime, font=self.fontTiny, fill=BLACK)
+
+            self.panel.display(image)
+
+            if self.partialCount >= 10:
+                self.panel.update()
+                self.partialCount = 0
+            else:
+                self.panel.partial_update()
+                self.partialCount += 1
 
     def dummyShowBusInfo(self):
         """blah"""
