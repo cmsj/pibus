@@ -1,4 +1,4 @@
-pybus 1.0
+pibus 1.0
 
 This is a very simple project to fetch information about my local bus stop in
 London and display the number of minutes until the next bus on an e-Ink

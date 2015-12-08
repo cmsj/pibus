@@ -39,7 +39,7 @@ def parse_options(args=None):
     return options
 
 
-class PyBus:
+class PiBus:
     options = None
     scheduler = None
     currentJSON = None
@@ -56,7 +56,7 @@ class PyBus:
     def __init__(self, options, scheduler):
         self.options = options
         self.scheduler = scheduler
-        self.logger = logging.getLogger("PyBus")
+        self.logger = logging.getLogger("PiBus")
 
         if options.debug:
             self.logger.setLevel(logging.DEBUG)
@@ -130,7 +130,8 @@ class PyBus:
                self.options.busLine.lower():
                 self.currentJSON.append(busItem)
 
-        self.lastFetchTime = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime())
+        self.lastFetchTime = time.strftime("%H:%M:%S %d/%m/%Y",
+                                           time.localtime())
 
         return True
 
@@ -168,13 +169,21 @@ class PyBus:
         # Draw a box on the screen
         draw.line(((0, 0), (self.panel.width, 0)), fill=BLACK, width=1)
         draw.line(((0, 0), (0, self.panel.height)), fill=BLACK, width=1)
-        draw.line(((self.panel.width - 1, 0), (self.panel.width - 1, self.panel.height)), fill=BLACK, width=1)
-        draw.line(((0, self.panel.height - 1), (self.panel.width - 1, self.panel.height - 1)), fill=BLACK, width=1)
+        draw.line(((self.panel.width - 1, 0),
+                  (self.panel.width - 1, self.panel.height)),
+                  fill=BLACK, width=1)
+        draw.line(((0, self.panel.height - 1),
+                  (self.panel.width - 1, self.panel.height - 1)),
+                  fill=BLACK, width=1)
 
         times = self.getTimes()
         if not times and not self.renderSuspended:
-            draw.text((0, 0), "No data available", font=self.fontMedium, fill=BLACK)
-            draw.text((0, 25), time.strftime("%H:%M:%S %d/%m/%Y", time.localtime()), font=self.fontMedium, fill=BLACK)
+            draw.text((0, 0), "No data available",
+                      font=self.fontMedium, fill=BLACK)
+            draw.text((0, 25),
+                      time.strftime("%H:%M:%S %d/%m/%Y",
+                                    time.localtime()),
+                      font=self.fontMedium, fill=BLACK)
             self.panel.display(image)
             self.panel.update()
             self.renderSuspended = True
@@ -183,8 +192,12 @@ class PyBus:
         else:
             self.renderSuspended = False
             # Divide up the box
-            draw.line(((self.panel.width * 0.66, 0), (self.panel.width * 0.66, self.panel.height)), fill=BLACK, width=1)
-            draw.line(((self.panel.width * 0.66, self.panel.height * 0.5), (self.panel.width, self.panel.height * 0.5)), fill=BLACK, width=1)
+            draw.line(((self.panel.width * 0.66, 0),
+                      (self.panel.width * 0.66, self.panel.height)),
+                      fill=BLACK, width=1)
+            draw.line(((self.panel.width * 0.66, self.panel.height * 0.5),
+                      (self.panel.width, self.panel.height * 0.5)),
+                      fill=BLACK, width=1)
 
             # Render the times
             draw.text((-3, 20), times[0], font=self.fontHuge, fill=BLACK)
@@ -192,10 +205,13 @@ class PyBus:
             draw.text((174, 100), times[2], font=self.fontLarge, fill=BLACK)
 
             # Render the bus route
-            draw.text((1, 0), self.options.busLine, font=self.fontTiny, fill=BLACK)
+            draw.text((1, 0), self.options.busLine,
+                      font=self.fontTiny, fill=BLACK)
 
             # Render the time of last successful data fetch
-            draw.text((1, self.panel.height - 10), "Fetched: %s" % self.lastFetchTime, font=self.fontTiny, fill=BLACK)
+            draw.text((1, self.panel.height - 10),
+                      "Fetched: %s" % self.lastFetchTime,
+                      font=self.fontTiny, fill=BLACK)
 
             self.panel.display(image)
 
@@ -220,15 +236,15 @@ class PyBus:
             print("Times info is empty")
             return
 
-        for time in times:
-            print("Bus due in %d minutes" % time)
+        for aTime in times:
+            print("Bus due in %d minutes" % aTime)
 
 
 if __name__ == "__main__":  # pragma: no cover
     logging.basicConfig()
     scheduler = BlockingScheduler()
     options = parse_options()
-    pybus = PyBus(options, scheduler)
+    pibus = PiBus(options, scheduler)
 
     try:
         scheduler.start()
