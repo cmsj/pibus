@@ -3,3 +3,12 @@ pibus 1.0
 This is a very simple project to fetch information about my local bus stop in
 London and display the number of minutes until the next bus on an e-Ink
 display attached to a Raspberry Pi.
+
+You need to put a font in this directory called font.ttf and unless it's the
+same version of Courier that I used, you'll need to adjust the co-ordinates
+the various bits of text are rendered at.
+
+You also need to figure out the ID of your bus stop. You can get a list of them
+from http://data.london.gov.uk/dataset/tfl-bus-stop-locations-and-routes
+
+Then run bus.sh -b BUSSTOPID -l BUSROUTENAME
