@@ -44,6 +44,7 @@ class PiBus:
     scheduler = None
     currentJSON = None
     logger = None
+    session = None
     fontTiny = None
     fontMedium = None
     fontLarge = None
@@ -57,6 +58,7 @@ class PiBus:
         self.options = options
         self.scheduler = scheduler
         self.logger = logging.getLogger("PiBus")
+        self.session = requests.Session()
 
         if options.debug:
             self.logger.setLevel(logging.DEBUG)
@@ -105,7 +107,7 @@ class PiBus:
         try:
             url = "%s/StopPoint/%s/arrivals" % (baseURL, stopID)
             self.logger.debug("Fetching: %s" % url)
-            result = requests.get(url)
+            result = self.session.get(url, timeout=20)
         except Exception as e:
             self.logger.error("fetchBusJSON error. Stop %s: %s" % (stopID, e))
             return None
